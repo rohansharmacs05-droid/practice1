@@ -1,23 +1,25 @@
 
-# Stage 1: Build Maven project
-FROM maven:3.9-eclipse-temurin-17 AS build
+# Stage 1: Build the Maven project
+FROM maven:3.9.9-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
-# Copy project files
+# Copy Maven configuration
 COPY pom.xml .
+
+# Copy Java source files
 COPY src ./src
 
-# Build the Maven project
-RUN mvn clean package
+# Compile and package the project
+RUN mvn clean package -DskipTests
 
 # Stage 2: Run the application
 FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
-# Copy generated JAR file
-COPY --from=build /app/target/CalculatorProject-1.0-SNAPSHOT.jar app.jar
+# Copy the generated JAR
+COPY --from=build /app/target/*.jar app.jar
 
-# Run calculator application
+# Execute calculator
 CMD ["java", "-cp", "app.jar", "com.example.App"]
